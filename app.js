@@ -16,14 +16,17 @@ function setPseudo(p){
   localStorage.setItem("pseudo", p);
 }
 
-function notify(msg){
-  alert(msg);
+function error(msg){
+  const el = document.getElementById("error");
+  if(el) el.innerText = msg;
 }
 
-/* ================= CREATE ================= */
+/* =========================
+   CREATE ROOM
+========================= */
 window.createRoom = async () => {
   const pseudo = document.getElementById("pseudo").value;
-  if(!pseudo) return;
+  if(!pseudo) return error("Pseudo requis");
 
   setPseudo(pseudo);
 
@@ -37,44 +40,52 @@ window.createRoom = async () => {
   window.location.href = `${BASE_URL}/room.html?code=${code}`;
 };
 
-/* ================= JOIN ================= */
+/* =========================
+   JOIN ROOM (SAFE)
+========================= */
 window.joinRoom = async () => {
   const pseudo = document.getElementById("pseudo").value;
   const code = document.getElementById("code").value;
 
-  if(!pseudo) return;
+  if(!pseudo) return error("Pseudo requis");
 
   setPseudo(pseudo);
 
   const ref = db.collection("rooms").doc(code);
   const doc = await ref.get();
 
-  if(!doc.exists) return;
+  if(!doc.exists) return error("Room inexistante");
 
   let players = doc.data().players || [];
-  players.push(pseudo);
+
+  if(!players.includes(pseudo)){
+    players.push(pseudo);
+  }
 
   await ref.update({ players });
 
   window.location.href = `${BASE_URL}/room.html?code=${code}`;
 };
 
-/* ================= ROOM ================= */
+/* =========================
+   ROOM LIVE
+========================= */
 if(window.location.pathname.includes("room.html")){
 
   const code = getCode();
   const pseudo = getPseudo();
   const ref = db.collection("rooms").doc(code);
 
-  ref.onSnapshot(async doc => {
+  ref.onSnapshot(doc => {
 
     if(!doc.exists){
-      notify("Room supprimée");
+      alert("Room supprimée");
       window.location.href = BASE_URL;
       return;
     }
 
     const data = doc.data();
+
     const isHost = data.host === pseudo;
 
     document.getElementById("deleteBtn").style.display = isHost ? "flex" : "none";
@@ -87,21 +98,23 @@ if(window.location.pathname.includes("room.html")){
       players.map(p => `
         <div class="player">
           ${p}
-          ${p === data.host ? `<svg class="crown" viewBox="0 0 24 24"><path fill="#f1c40f" d="M3 17l2-9 5 6 5-6 2 9H3z"/></svg>` : ""}
+          ${p === data.host ? "👑" : ""}
         </div>
       `).join("");
 
-    // QR
     const url = `${BASE_URL}/login.html?code=${code}`;
     const qrDiv = document.getElementById("qr");
     qrDiv.innerHTML = "";
+
     QRCode.toCanvas(document.createElement("canvas"), url, (e,c)=>{
       qrDiv.appendChild(c);
     });
   });
 }
 
-/* ================= DELETE ROOM ================= */
+/* =========================
+   DELETE ROOM (HOST)
+========================= */
 window.deleteRoom = async () => {
   const code = getCode();
 
@@ -112,12 +125,16 @@ window.deleteRoom = async () => {
 
   await ref.delete();
 
-  players.forEach(() => notify("Room supprimée par l'hôte"));
+  players.forEach(() => {
+    alert("Room supprimée par l'hôte");
+  });
 
   window.location.href = BASE_URL;
 };
 
-/* ================= LEAVE ================= */
+/* =========================
+   LEAVE ROOM (FIX HOST TRANSFER)
+========================= */
 window.leaveRoom = async () => {
   const code = getCode();
   const pseudo = getPseudo();
@@ -131,9 +148,9 @@ window.leaveRoom = async () => {
   }
 
   let data = doc.data();
-  let players = data.players.filter(p => p !== pseudo);
+  let players = (data.players || []).filter(p => p !== pseudo);
 
-  // host leave → transfer obligatoire
+  // HOST LEAVE → transfert automatique
   if(data.host === pseudo){
 
     if(players.length === 0){
@@ -142,12 +159,14 @@ window.leaveRoom = async () => {
       return;
     }
 
-    document.getElementById("hostModal").style.display = "flex";
+    const newHost = players[0];
 
-    const select = document.getElementById("hostSelect");
-    select.innerHTML = players.map(p => `<option>${p}</option>`).join("");
+    await ref.update({
+      host: newHost,
+      players
+    });
 
-    window.pendingPlayers = players;
+    window.location.href = BASE_URL;
     return;
   }
 
@@ -156,29 +175,9 @@ window.leaveRoom = async () => {
   window.location.href = BASE_URL;
 };
 
-/* ================= NEW HOST ================= */
-window.confirmNewHost = async () => {
-  const code = getCode();
-  const newHost = document.getElementById("hostSelect").value;
-
-  const ref = db.collection("rooms").doc(code);
-  const doc = await ref.get();
-
-  if(!doc.exists) return;
-
-  let data = doc.data();
-
-  let players = data.players.filter(p => p !== getPseudo());
-
-  await ref.update({
-    host: newHost,
-    players
-  });
-
-  window.location.href = BASE_URL;
-};
-
-/* ================= LOGIN ================= */
+/* =========================
+   LOGIN QR
+========================= */
 window.joinFromQR = async () => {
   const pseudo = document.getElementById("pseudo").value;
   const code = getCode();
@@ -189,7 +188,7 @@ window.joinFromQR = async () => {
   const doc = await ref.get();
 
   if(!doc.exists){
-    notify("Room supprimée");
+    alert("Room supprimée");
     window.location.href = BASE_URL;
     return;
   }
