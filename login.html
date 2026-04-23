@@ -2,25 +2,22 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Room</title>
+<title>Login</title>
 </head>
 <body>
 
-<h1>Room</h1>
+<h1>Rejoindre la room</h1>
 
-<h2 id="roomCode"></h2>
+<input id="pseudo" placeholder="Pseudo"><br><br>
+<button onclick="joinFromQR()">Rejoindre</button>
 
-<div id="players"></div>
-
-<div id="qr"></div>
+<div id="error" style="color:red;"></div>
 
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 
-<script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
-
-<script src="firebase.js"></script>
-<script src="app.js"></script>
+<script src="../firebase.js"></script>
+<script src="../app.js"></script>
 
 </body>
 </html>
