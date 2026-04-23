@@ -1,5 +1,8 @@
-const baseURL = "https://agentpioupiou.github.io/momo";
+const BASE_URL = "https://agentpioupiou.github.io/momo";
 
+// --------------------
+// utils
+// --------------------
 function generateCode(){
   return Math.random().toString(36).substring(2,10).toUpperCase();
 }
@@ -14,9 +17,9 @@ function error(msg){
   console.log(msg);
 }
 
-/* =========================
-   🏠 CREATE ROOM
-========================= */
+// --------------------
+// CREATE ROOM
+// --------------------
 window.createRoom = async () => {
   const pseudo = document.getElementById("pseudo").value;
 
@@ -31,13 +34,13 @@ window.createRoom = async () => {
     players: [pseudo]
   });
 
-  // 🔥 REDIRECTION PROPRE GITHUB PAGES
-  window.location.href = `${baseURL}/room.html?code=${code}`;
+  // 🔥 SAFE REDIRECT (PLUS AUCUN /CODE POSSIBLE)
+  window.location.href = `${BASE_URL}/room.html?code=${code}`;
 };
 
-/* =========================
-   🚪 JOIN ROOM
-========================= */
+// --------------------
+// JOIN ROOM
+// --------------------
 window.joinRoom = async () => {
   const pseudo = document.getElementById("pseudo").value;
   const code = document.getElementById("code").value;
@@ -60,13 +63,12 @@ window.joinRoom = async () => {
 
   await ref.update({ players });
 
-  // 🔥 REDIRECTION
-  window.location.href = `${baseURL}/room.html?code=${code}`;
+  window.location.href = `${BASE_URL}/room.html?code=${code}`;
 };
 
-/* =========================
-   🎮 ROOM PAGE
-========================= */
+// --------------------
+// ROOM PAGE
+// --------------------
 if(window.location.pathname.includes("room.html")){
 
   const code = getCode();
@@ -82,8 +84,8 @@ if(window.location.pathname.includes("room.html")){
     document.getElementById("players").innerHTML =
       players.map(p => `<div>${p}</div>`).join("");
 
-    // 📱 QR CODE vers login
-    const loginURL = `${baseURL}/login.html?code=${code}`;
+    // QR CODE login
+    const loginURL = `${BASE_URL}/login.html?code=${code}`;
 
     const qrDiv = document.getElementById("qr");
     qrDiv.innerHTML = "";
@@ -94,9 +96,9 @@ if(window.location.pathname.includes("room.html")){
   });
 }
 
-/* =========================
-   📱 LOGIN PAGE
-========================= */
+// --------------------
+// LOGIN PAGE
+// --------------------
 window.joinFromQR = async () => {
   const pseudo = document.getElementById("pseudo").value;
   const code = getCode();
@@ -119,6 +121,5 @@ window.joinFromQR = async () => {
 
   await ref.update({ players });
 
-  // 🔥 retour room
-  window.location.href = `${baseURL}/room.html?code=${code}`;
+  window.location.href = `${BASE_URL}/room.html?code=${code}`;
 };
