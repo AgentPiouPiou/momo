@@ -1,0 +1,65 @@
+body{
+  margin:0;
+  font-family: Arial;
+  background: linear-gradient(135deg,#27305b,#353442);
+  color:#fcffff;
+  text-align:center;
+}
+
+/* boutons */
+button{
+  background:#e12852;
+  color:white;
+  border:none;
+  padding:12px 18px;
+  border-radius:12px;
+  cursor:pointer;
+  transition:0.2s;
+}
+
+button:hover{
+  transform:scale(1.05);
+  background:#e5395f;
+}
+
+/* inputs */
+input{
+  padding:10px;
+  border-radius:10px;
+  border:none;
+  margin:5px;
+}
+
+/* players */
+#players{
+  display:flex;
+  flex-wrap:wrap;
+  justify-content:center;
+  gap:15px;
+  margin-top:20px;
+}
+
+.player{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  animation:pop 0.3s ease;
+}
+
+.avatar{
+  width:70px;
+  height:70px;
+  border-radius:50%;
+  border:3px solid #f7cd3b;
+  object-fit:cover;
+  box-shadow:0 0 12px #32abe4;
+}
+
+@keyframes pop{
+  from{transform:scale(0.8);opacity:0}
+  to{transform:scale(1);opacity:1}
+}
+
+h1,h2{
+  text-shadow:0 0 10px #32abe4;
+}

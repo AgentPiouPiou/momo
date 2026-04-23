@@ -2,13 +2,19 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Accueil</title>
+<title>Momo Game</title>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<h1>Jeu multijoueur</h1>
+<h1>Momo Game</h1>
 
 <input id="pseudo" placeholder="Pseudo"><br><br>
+
+<!-- 📸 caméra obligatoire -->
+<input type="file" accept="image/*" capture="user" id="avatarInput"><br><br>
+
+<img id="preview" style="display:none;width:80px;height:80px;border-radius:50%;"><br><br>
 
 <button onclick="createRoom()">Créer une room</button><br><br>
 

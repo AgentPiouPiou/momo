@@ -1,7 +1,29 @@
 const BASE_URL = "https://agentpioupiou.github.io/momo";
 
+let avatarBase64 = null;
+
 // --------------------
-// utils
+// CAMERA PREVIEW
+// --------------------
+const input = document.getElementById("avatarInput");
+
+if(input){
+  input.addEventListener("change", function(){
+    const file = this.files[0];
+    const reader = new FileReader();
+
+    reader.onload = function(e){
+      avatarBase64 = e.target.result;
+
+      const img = document.getElementById("preview");
+      img.src = avatarBase64;
+      img.style.display = "block";
+    };
+
+    reader.readAsDataURL(file);
+  });
+}
+
 // --------------------
 function generateCode(){
   return Math.random().toString(36).substring(2,10).toUpperCase();
@@ -28,13 +50,20 @@ window.createRoom = async () => {
     return;
   }
 
+  if(!avatarBase64){
+    error("Photo obligatoire");
+    return;
+  }
+
   const code = generateCode();
 
   await db.collection("rooms").doc(code).set({
-    players: [pseudo]
+    players: [{
+      name: pseudo,
+      avatar: avatarBase64
+    }]
   });
 
-  // 🔥 SAFE REDIRECT (PLUS AUCUN /CODE POSSIBLE)
   window.location.href = `${BASE_URL}/room.html?code=${code}`;
 };
 
@@ -50,6 +79,11 @@ window.joinRoom = async () => {
     return;
   }
 
+  if(!avatarBase64){
+    error("Photo obligatoire");
+    return;
+  }
+
   const ref = db.collection("rooms").doc(code);
   const doc = await ref.get();
 
@@ -59,7 +93,11 @@ window.joinRoom = async () => {
   }
 
   let players = doc.data().players || [];
-  players.push(pseudo);
+
+  players.push({
+    name: pseudo,
+    avatar: avatarBase64
+  });
 
   await ref.update({ players });
 
@@ -82,9 +120,13 @@ if(window.location.pathname.includes("room.html")){
     const players = data.players || [];
 
     document.getElementById("players").innerHTML =
-      players.map(p => `<div>${p}</div>`).join("");
+      players.map(p => `
+        <div class="player">
+          <img class="avatar" src="${p.avatar}">
+          <div>${p.name}</div>
+        </div>
+      `).join("");
 
-    // QR CODE login
     const loginURL = `${BASE_URL}/login.html?code=${code}`;
 
     const qrDiv = document.getElementById("qr");
@@ -108,6 +150,11 @@ window.joinFromQR = async () => {
     return;
   }
 
+  if(!avatarBase64){
+    error("Photo obligatoire");
+    return;
+  }
+
   const ref = db.collection("rooms").doc(code);
   const doc = await ref.get();
 
@@ -117,7 +164,11 @@ window.joinFromQR = async () => {
   }
 
   let players = doc.data().players || [];
-  players.push(pseudo);
+
+  players.push({
+    name: pseudo,
+    avatar: avatarBase64
+  });
 
   await ref.update({ players });
 
