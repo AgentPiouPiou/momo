@@ -1,27 +1,23 @@
 body{
   margin:0;
-  font-family: system-ui, Arial;
-  background:#f4f6fb;
-  color:#1f2d3d;
+  font-family:system-ui, Arial;
+  background:#ffe7e7;
+  color:#0b0e13;
   display:flex;
   flex-direction:column;
   align-items:center;
 }
 
-/* container */
 .container{
   width:95%;
   max-width:700px;
   margin-top:20px;
 }
 
-/* titles */
 h1{
   font-size:26px;
-  margin:10px 0;
 }
 
-/* inputs */
 input{
   width:90%;
   max-width:300px;
@@ -29,10 +25,8 @@ input{
   margin:6px;
   border-radius:12px;
   border:1px solid #d0d7e2;
-  font-size:16px;
 }
 
-/* buttons */
 button{
   width:90%;
   max-width:300px;
@@ -50,18 +44,6 @@ button:hover{
   background:#3a57d7;
 }
 
-/* room */
-.roomHeader{
-  margin-top:10px;
-  text-align:center;
-}
-
-#roomCode{
-  font-size:20px;
-  font-weight:bold;
-}
-
-/* players */
 #players{
   display:flex;
   flex-wrap:wrap;
@@ -73,28 +55,12 @@ button:hover{
 .player{
   background:white;
   padding:10px 14px;
-  border-radius:14px;
+  border-radius:12px;
   box-shadow:0 2px 10px rgba(0,0,0,0.08);
-  display:flex;
-  align-items:center;
-  gap:6px;
-  font-weight:600;
   min-width:120px;
-  justify-content:center;
+  text-align:center;
 }
 
-/* crown */
-.crown{
-  width:16px;
-  height:16px;
-}
-
-/* QR */
-#qr{
-  margin-top:10px;
-}
-
-/* floating buttons */
 .fab{
   position:fixed;
   bottom:20px;
@@ -105,7 +71,6 @@ button:hover{
   align-items:center;
   justify-content:center;
   cursor:pointer;
-  box-shadow:0 6px 18px rgba(0,0,0,0.2);
 }
 
 .leave{
