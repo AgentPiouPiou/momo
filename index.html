@@ -2,25 +2,164 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Accueil</title>
+<title>Jeu Multijoueur</title>
+
+<style>
+body {
+  font-family: Arial;
+  text-align: center;
+}
+
+#error {
+  color: red;
+  margin-top: 10px;
+}
+
+input, button {
+  padding: 10px;
+  margin: 5px;
+}
+
+.player {
+  margin: 5px;
+}
+</style>
 </head>
+
 <body>
 
-<h1>Accueil</h1>
+<h1>Jeu Multijoueur</h1>
 
-<input id="pseudo" placeholder="Pseudo"><br><br>
+<input id="pseudo" placeholder="Pseudo"><br>
 
-<button onclick="createRoom()">Créer une room</button><br><br>
+<button onclick="createRoom()">Créer une room</button><br>
 
 <input id="code" placeholder="Code room">
 <button onclick="joinRoom()">Rejoindre</button>
 
-<div id="error" style="color:red;margin-top:10px;"></div>
+<div id="error"></div>
 
+<hr>
+
+<h2 id="roomCode"></h2>
+<div id="players"></div>
+
+<!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 
-<script src="app.js"></script>
+<script>
+// 🔥 CONFIG FIREBASE
+const firebaseConfig = {
+  apiKey: "AIzaSyB...EJoN0",
+  authDomain: "jeu-multijoueur-3cdc7.firebaseapp.com",
+  projectId: "jeu-multijoueur-3cdc7"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
+let currentRoom = null;
+
+// 🔑 générer code
+function generateCode() {
+  return Math.random().toString(36).substring(2,10).toUpperCase();
+}
+
+// ❌ erreur
+function showError(msg){
+  document.getElementById("error").innerText = msg;
+}
+
+// 🎨 afficher joueurs
+function render(players){
+  const div = document.getElementById("players");
+  div.innerHTML = "";
+
+  players.forEach(p => {
+    div.innerHTML += `<div class="player">${p}</div>`;
+  });
+}
+
+// 🏠 créer room
+window.createRoom = async () => {
+  try {
+    const pseudo = document.getElementById("pseudo").value;
+
+    if(!pseudo){
+      showError("Entre un pseudo");
+      return;
+    }
+
+    const code = generateCode();
+    currentRoom = code;
+
+    await db.collection("rooms").doc(code).set({
+      players: [pseudo]
+    });
+
+    document.getElementById("roomCode").innerText = "Room : " + code;
+
+    listenRoom(code);
+  } catch (e) {
+    showError(e.message);
+  }
+};
+
+// 🚪 rejoindre room
+window.joinRoom = async () => {
+  try {
+    const pseudo = document.getElementById("pseudo").value;
+    const code = document.getElementById("code").value;
+
+    if(!pseudo){
+      showError("Entre un pseudo");
+      return;
+    }
+
+    if(!code){
+      showError("Entre un code");
+      return;
+    }
+
+    const ref = db.collection("rooms").doc(code);
+    const doc = await ref.get();
+
+    if(!doc.exists){
+      showError("Room inexistante");
+      return;
+    }
+
+    let players = doc.data().players;
+    players.push(pseudo);
+
+    await ref.update({ players });
+
+    document.getElementById("roomCode").innerText = "Room : " + code;
+
+    listenRoom(code);
+
+  } catch (e) {
+    showError(e.message);
+  }
+};
+
+// 👀 écouter room en live
+function listenRoom(code){
+  db.collection("rooms").doc(code)
+  .onSnapshot(doc => {
+
+    if(!doc.exists){
+      showError("Room supprimée");
+      return;
+    }
+
+    const data = doc.data();
+    render(data.players || []);
+  });
+}
+
+</script>
 
 </body>
 </html>
