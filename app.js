@@ -1,3 +1,5 @@
+const baseURL = "https://agentpioupiou.github.io/momo";
+
 function generateCode(){
   return Math.random().toString(36).substring(2,10).toUpperCase();
 }
@@ -29,7 +31,8 @@ window.createRoom = async () => {
     players: [pseudo]
   });
 
-  window.location.href = `room.html?code=${code}`;
+  // 🔥 REDIRECTION PROPRE GITHUB PAGES
+  window.location.href = `${baseURL}/room.html?code=${code}`;
 };
 
 /* =========================
@@ -57,7 +60,8 @@ window.joinRoom = async () => {
 
   await ref.update({ players });
 
-  window.location.href = `room.html?code=${code}`;
+  // 🔥 REDIRECTION
+  window.location.href = `${baseURL}/room.html?code=${code}`;
 };
 
 /* =========================
@@ -78,8 +82,8 @@ if(window.location.pathname.includes("room.html")){
     document.getElementById("players").innerHTML =
       players.map(p => `<div>${p}</div>`).join("");
 
-    // QR CODE vers login
-    const loginURL = `https://agentpioupiou.github.io/momo/login.html?code=${code}`;
+    // 📱 QR CODE vers login
+    const loginURL = `${baseURL}/login.html?code=${code}`;
 
     const qrDiv = document.getElementById("qr");
     qrDiv.innerHTML = "";
@@ -115,5 +119,6 @@ window.joinFromQR = async () => {
 
   await ref.update({ players });
 
-  window.location.href = `room.html?code=${code}`;
+  // 🔥 retour room
+  window.location.href = `${baseURL}/room.html?code=${code}`;
 };
