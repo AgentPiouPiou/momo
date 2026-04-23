@@ -1,40 +1,52 @@
 body{
   margin:0;
-  font-family: Arial;
-  background:#fcffff;
-  color:#27305b;
+  font-family: Arial, sans-serif;
+  background:#f5f5f5;
+  color:#333;
   text-align:center;
 }
 
-/* boutons */
+/* TITRES */
+h1,h2{
+  color:#222;
+  margin-top:20px;
+}
+
+/* INPUTS */
+input{
+  padding:12px;
+  border-radius:12px;
+  border:2px solid #ddd;
+  outline:none;
+  width:220px;
+  margin:5px;
+  font-size:16px;
+}
+
+input:focus{
+  border-color:#4a6cf7;
+}
+
+/* BUTTONS KAHOOT STYLE */
 button{
-  background:#127dc1;
+  background:#4a6cf7;
   color:white;
   border:none;
-  padding:10px 14px;
-  border-radius:10px;
+  padding:12px 18px;
+  border-radius:12px;
+  font-size:16px;
   cursor:pointer;
   transition:0.2s;
+  margin:5px;
 }
 
 button:hover{
-  background:#32abe4;
-}
-
-/* inputs */
-input{
-  padding:10px;
-  border-radius:10px;
-  border:1px solid #ccc;
-  margin:5px;
+  background:#3a57d7;
+  transform:scale(1.03);
 }
 
 /* ROOM HEADER */
 .roomHeader{
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  gap:10px;
   margin-top:10px;
 }
 
@@ -43,27 +55,33 @@ input{
   display:flex;
   flex-wrap:wrap;
   justify-content:center;
-  gap:10px;
+  gap:12px;
   margin-top:20px;
 }
 
 .player{
-  background:#f2f4f8;
-  padding:8px 14px;
-  border-radius:12px;
+  background:white;
+  padding:10px 14px;
+  border-radius:16px;
+  box-shadow:0 2px 8px rgba(0,0,0,0.1);
   display:flex;
   align-items:center;
   gap:6px;
-  min-width:90px;
+  font-weight:bold;
 }
 
-/* crown */
+/* COURONNE */
 .crown{
   width:16px;
   height:16px;
 }
 
-/* bottom buttons */
+/* QR */
+#qr{
+  margin-top:15px;
+}
+
+/* BOUTONS FLOTTANTS */
 .fab{
   position:fixed;
   bottom:20px;
@@ -79,20 +97,20 @@ input{
 }
 
 .delete{
-  background:#e12852;
+  background:#e74c3c;
 }
 
 .leave{
-  background:#e12852;
+  background:#e74c3c;
 }
 
 .fab svg{
-  width:26px;
-  height:26px;
+  width:24px;
+  height:24px;
   fill:white;
 }
 
-/* QR */
-#qr{
-  margin-top:10px;
+/* KAHOOT FEEL */
+.container{
+  margin-top:30px;
 }

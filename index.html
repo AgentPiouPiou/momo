@@ -2,21 +2,25 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Momo Game</title>
+<title>Kahoot Game</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<h1>Momo Game</h1>
+<h1>🎮 Momo Game</h1>
 
-<input id="pseudo" placeholder="Pseudo"><br><br>
+<div class="container">
+
+<input id="pseudo" placeholder="Pseudo"><br>
 
 <button onclick="createRoom()">Créer une room</button><br><br>
 
-<input id="code" placeholder="Code room">
+<input id="code" placeholder="Code room"><br>
 <button onclick="joinRoom()">Rejoindre</button>
 
 <div id="error" style="color:red;"></div>
+
+</div>
 
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>

@@ -63,12 +63,11 @@ window.joinRoom = async () => {
 };
 
 /* =========================
-   ROOM PAGE
+   ROOM
 ========================= */
 if(window.location.pathname.includes("room.html")){
 
   const code = getCode();
-
   const pseudo = prompt("Ton pseudo ?");
   const ref = db.collection("rooms").doc(code);
 
@@ -81,12 +80,11 @@ if(window.location.pathname.includes("room.html")){
     }
 
     const data = doc.data();
-
     const isHost = data.host === pseudo;
 
     document.getElementById("deleteBtn").style.display = isHost ? "flex" : "none";
 
-    document.getElementById("roomCode").innerText = "Room : " + code;
+    document.getElementById("roomCode").innerText = "Code : " + code;
 
     document.getElementById("players").innerHTML =
       (data.players || []).map(p => `
@@ -94,7 +92,7 @@ if(window.location.pathname.includes("room.html")){
           ${p}
           ${p === data.host ? `
             <svg class="crown" viewBox="0 0 24 24">
-              <path fill="#f7cd3b" d="M3 17l2-9 5 6 5-6 2 9H3z"/>
+              <path fill="#f1c40f" d="M3 17l2-9 5 6 5-6 2 9H3z"/>
             </svg>
           ` : ""}
         </div>
@@ -112,7 +110,7 @@ if(window.location.pathname.includes("room.html")){
 }
 
 /* =========================
-   DELETE ROOM (HOST)
+   DELETE ROOM
 ========================= */
 window.deleteRoom = async () => {
   const code = getCode();
@@ -120,12 +118,11 @@ window.deleteRoom = async () => {
   await db.collection("rooms").doc(code).delete();
 
   alert("Room supprimée");
-
   window.location.href = BASE_URL;
 };
 
 /* =========================
-   LEAVE ROOM
+   LEAVE
 ========================= */
 window.leaveRoom = async () => {
   window.location.href = BASE_URL;
