@@ -1,8 +1,5 @@
 const BASE_URL = "https://agentpioupiou.github.io/momo";
 
-let currentPseudo = null;
-
-// --------------------
 function generateCode(){
   return Math.random().toString(36).substring(2,10).toUpperCase();
 }
@@ -16,9 +13,9 @@ function error(msg){
   if(el) el.innerText = msg;
 }
 
-// --------------------
-// CREATE ROOM
-// --------------------
+/* =========================
+   CREATE ROOM
+========================= */
 window.createRoom = async () => {
   const pseudo = document.getElementById("pseudo").value;
 
@@ -37,9 +34,9 @@ window.createRoom = async () => {
   window.location.href = `${BASE_URL}/room.html?code=${code}`;
 };
 
-// --------------------
-// JOIN ROOM
-// --------------------
+/* =========================
+   JOIN ROOM
+========================= */
 window.joinRoom = async () => {
   const pseudo = document.getElementById("pseudo").value;
   const code = document.getElementById("code").value;
@@ -65,16 +62,14 @@ window.joinRoom = async () => {
   window.location.href = `${BASE_URL}/room.html?code=${code}`;
 };
 
-// --------------------
-// ROOM PAGE
-// --------------------
+/* =========================
+   ROOM PAGE
+========================= */
 if(window.location.pathname.includes("room.html")){
 
   const code = getCode();
 
-  let pseudo = prompt("Ton pseudo ?");
-  currentPseudo = pseudo;
-
+  const pseudo = prompt("Ton pseudo ?");
   const ref = db.collection("rooms").doc(code);
 
   ref.onSnapshot(doc => {
@@ -89,13 +84,12 @@ if(window.location.pathname.includes("room.html")){
 
     const isHost = data.host === pseudo;
 
-    // bouton delete host
     document.getElementById("deleteBtn").style.display = isHost ? "flex" : "none";
 
     document.getElementById("roomCode").innerText = "Room : " + code;
 
     document.getElementById("players").innerHTML =
-      data.players.map(p => `
+      (data.players || []).map(p => `
         <div class="player">
           ${p}
           ${p === data.host ? `
@@ -117,9 +111,9 @@ if(window.location.pathname.includes("room.html")){
   });
 }
 
-// --------------------
-// DELETE ROOM (HOST)
-// --------------------
+/* =========================
+   DELETE ROOM (HOST)
+========================= */
 window.deleteRoom = async () => {
   const code = getCode();
 
@@ -130,16 +124,16 @@ window.deleteRoom = async () => {
   window.location.href = BASE_URL;
 };
 
-// --------------------
-// LEAVE ROOM
-// --------------------
+/* =========================
+   LEAVE ROOM
+========================= */
 window.leaveRoom = async () => {
   window.location.href = BASE_URL;
 };
 
-// --------------------
-// LOGIN
-// --------------------
+/* =========================
+   LOGIN
+========================= */
 window.joinFromQR = async () => {
   const pseudo = document.getElementById("pseudo").value;
   const code = getCode();
