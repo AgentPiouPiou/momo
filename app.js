@@ -13,9 +13,20 @@ function error(msg){
   if(el) el.innerText = msg;
 }
 
-/* =========================
+/* =====================
+   PSEUDO MEMORY (FIX BUG PROMPT)
+===================== */
+function getPseudo(){
+  return localStorage.getItem("pseudo");
+}
+
+function setPseudo(p){
+  localStorage.setItem("pseudo", p);
+}
+
+/* =====================
    CREATE ROOM
-========================= */
+===================== */
 window.createRoom = async () => {
   const pseudo = document.getElementById("pseudo").value;
 
@@ -23,6 +34,8 @@ window.createRoom = async () => {
     error("Pseudo requis");
     return;
   }
+
+  setPseudo(pseudo);
 
   const code = generateCode();
 
@@ -34,9 +47,9 @@ window.createRoom = async () => {
   window.location.href = `${BASE_URL}/room.html?code=${code}`;
 };
 
-/* =========================
+/* =====================
    JOIN ROOM
-========================= */
+===================== */
 window.joinRoom = async () => {
   const pseudo = document.getElementById("pseudo").value;
   const code = document.getElementById("code").value;
@@ -45,6 +58,8 @@ window.joinRoom = async () => {
     error("Pseudo requis");
     return;
   }
+
+  setPseudo(pseudo);
 
   const ref = db.collection("rooms").doc(code);
   const doc = await ref.get();
@@ -62,24 +77,26 @@ window.joinRoom = async () => {
   window.location.href = `${BASE_URL}/room.html?code=${code}`;
 };
 
-/* =========================
-   ROOM
-========================= */
+/* =====================
+   ROOM SYSTEM
+===================== */
 if(window.location.pathname.includes("room.html")){
 
   const code = getCode();
-  const pseudo = prompt("Ton pseudo ?");
   const ref = db.collection("rooms").doc(code);
 
-  ref.onSnapshot(doc => {
+  const pseudo = getPseudo();
+
+  ref.onSnapshot(async doc => {
 
     if(!doc.exists){
-      alert("Room supprimée");
+      alert("Room supprimée par l'hôte");
       window.location.href = BASE_URL;
       return;
     }
 
     const data = doc.data();
+
     const isHost = data.host === pseudo;
 
     document.getElementById("deleteBtn").style.display = isHost ? "flex" : "none";
@@ -90,14 +107,11 @@ if(window.location.pathname.includes("room.html")){
       (data.players || []).map(p => `
         <div class="player">
           ${p}
-          ${p === data.host ? `
-            <svg class="crown" viewBox="0 0 24 24">
-              <path fill="#f1c40f" d="M3 17l2-9 5 6 5-6 2 9H3z"/>
-            </svg>
-          ` : ""}
+          ${p === data.host ? `<span>👑</span>` : ""}
         </div>
       `).join("");
 
+    // QR
     const loginURL = `${BASE_URL}/login.html?code=${code}`;
 
     const qrDiv = document.getElementById("qr");
@@ -109,9 +123,9 @@ if(window.location.pathname.includes("room.html")){
   });
 }
 
-/* =========================
-   DELETE ROOM
-========================= */
+/* =====================
+   DELETE ROOM (HOST)
+===================== */
 window.deleteRoom = async () => {
   const code = getCode();
 
@@ -121,19 +135,54 @@ window.deleteRoom = async () => {
   window.location.href = BASE_URL;
 };
 
-/* =========================
-   LEAVE
-========================= */
+/* =====================
+   LEAVE ROOM (TRANSFER HOST + REMOVE PLAYER)
+===================== */
 window.leaveRoom = async () => {
+  const code = getCode();
+  const pseudo = getPseudo();
+
+  const ref = db.collection("rooms").doc(code);
+  const doc = await ref.get();
+
+  if(!doc.exists){
+    window.location.href = BASE_URL;
+    return;
+  }
+
+  let data = doc.data();
+  let players = data.players || [];
+
+  // retirer joueur
+  players = players.filter(p => p !== pseudo);
+
+  // si host quitte → transférer host
+  if(data.host === pseudo){
+    if(players.length > 0){
+      data.host = players[0];
+    } else {
+      await ref.delete();
+      window.location.href = BASE_URL;
+      return;
+    }
+  }
+
+  await ref.update({
+    players,
+    host: data.host
+  });
+
   window.location.href = BASE_URL;
 };
 
-/* =========================
-   LOGIN
-========================= */
+/* =====================
+   LOGIN ROOM
+===================== */
 window.joinFromQR = async () => {
   const pseudo = document.getElementById("pseudo").value;
   const code = getCode();
+
+  setPseudo(pseudo);
 
   const ref = db.collection("rooms").doc(code);
   const doc = await ref.get();
