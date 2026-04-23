@@ -1,28 +1,6 @@
 const BASE_URL = "https://agentpioupiou.github.io/momo";
 
-let avatarBase64 = null;
-
-// --------------------
-// CAMERA PREVIEW
-// --------------------
-const input = document.getElementById("avatarInput");
-
-if(input){
-  input.addEventListener("change", function(){
-    const file = this.files[0];
-    const reader = new FileReader();
-
-    reader.onload = function(e){
-      avatarBase64 = e.target.result;
-
-      const img = document.getElementById("preview");
-      img.src = avatarBase64;
-      img.style.display = "block";
-    };
-
-    reader.readAsDataURL(file);
-  });
-}
+let currentPseudo = null;
 
 // --------------------
 function generateCode(){
@@ -36,7 +14,6 @@ function getCode(){
 function error(msg){
   const el = document.getElementById("error");
   if(el) el.innerText = msg;
-  console.log(msg);
 }
 
 // --------------------
@@ -50,18 +27,11 @@ window.createRoom = async () => {
     return;
   }
 
-  if(!avatarBase64){
-    error("Photo obligatoire");
-    return;
-  }
-
   const code = generateCode();
 
   await db.collection("rooms").doc(code).set({
-    players: [{
-      name: pseudo,
-      avatar: avatarBase64
-    }]
+    host: pseudo,
+    players: [pseudo]
   });
 
   window.location.href = `${BASE_URL}/room.html?code=${code}`;
@@ -79,11 +49,6 @@ window.joinRoom = async () => {
     return;
   }
 
-  if(!avatarBase64){
-    error("Photo obligatoire");
-    return;
-  }
-
   const ref = db.collection("rooms").doc(code);
   const doc = await ref.get();
 
@@ -93,11 +58,7 @@ window.joinRoom = async () => {
   }
 
   let players = doc.data().players || [];
-
-  players.push({
-    name: pseudo,
-    avatar: avatarBase64
-  });
+  players.push(pseudo);
 
   await ref.update({ players });
 
@@ -111,19 +72,37 @@ if(window.location.pathname.includes("room.html")){
 
   const code = getCode();
 
-  document.getElementById("roomCode").innerText = "Room : " + code;
+  let pseudo = prompt("Ton pseudo ?");
+  currentPseudo = pseudo;
 
   const ref = db.collection("rooms").doc(code);
 
   ref.onSnapshot(doc => {
+
+    if(!doc.exists){
+      alert("Room supprimée");
+      window.location.href = BASE_URL;
+      return;
+    }
+
     const data = doc.data();
-    const players = data.players || [];
+
+    const isHost = data.host === pseudo;
+
+    // bouton delete host
+    document.getElementById("deleteBtn").style.display = isHost ? "flex" : "none";
+
+    document.getElementById("roomCode").innerText = "Room : " + code;
 
     document.getElementById("players").innerHTML =
-      players.map(p => `
+      data.players.map(p => `
         <div class="player">
-          <img class="avatar" src="${p.avatar}">
-          <div>${p.name}</div>
+          ${p}
+          ${p === data.host ? `
+            <svg class="crown" viewBox="0 0 24 24">
+              <path fill="#f7cd3b" d="M3 17l2-9 5 6 5-6 2 9H3z"/>
+            </svg>
+          ` : ""}
         </div>
       `).join("");
 
@@ -132,43 +111,50 @@ if(window.location.pathname.includes("room.html")){
     const qrDiv = document.getElementById("qr");
     qrDiv.innerHTML = "";
 
-    QRCode.toCanvas(document.createElement("canvas"), loginURL, (err, canvas) => {
+    QRCode.toCanvas(document.createElement("canvas"), loginURL, (e, canvas) => {
       qrDiv.appendChild(canvas);
     });
   });
 }
 
 // --------------------
-// LOGIN PAGE
+// DELETE ROOM (HOST)
+// --------------------
+window.deleteRoom = async () => {
+  const code = getCode();
+
+  await db.collection("rooms").doc(code).delete();
+
+  alert("Room supprimée");
+
+  window.location.href = BASE_URL;
+};
+
+// --------------------
+// LEAVE ROOM
+// --------------------
+window.leaveRoom = async () => {
+  window.location.href = BASE_URL;
+};
+
+// --------------------
+// LOGIN
 // --------------------
 window.joinFromQR = async () => {
   const pseudo = document.getElementById("pseudo").value;
   const code = getCode();
 
-  if(!pseudo){
-    error("Pseudo requis");
-    return;
-  }
-
-  if(!avatarBase64){
-    error("Photo obligatoire");
-    return;
-  }
-
   const ref = db.collection("rooms").doc(code);
   const doc = await ref.get();
 
   if(!doc.exists){
-    error("Room inexistante");
+    alert("Room supprimée");
+    window.location.href = BASE_URL;
     return;
   }
 
   let players = doc.data().players || [];
-
-  players.push({
-    name: pseudo,
-    avatar: avatarBase64
-  });
+  players.push(pseudo);
 
   await ref.update({ players });
 
