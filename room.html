@@ -9,21 +9,29 @@
 
 <h1>Lobby</h1>
 
-<div class="roomHeader">
-  <h2 id="roomCode"></h2>
-  <div id="qr"></div>
-</div>
+<h2 id="roomCode"></h2>
 
 <div id="players"></div>
 
-<!-- host delete -->
+<div id="qr"></div>
+
+<!-- DELETE ROOM -->
 <div id="deleteBtn" class="fab delete" style="display:none;" onclick="deleteRoom()">
   🗑
 </div>
 
-<!-- leave -->
+<!-- LEAVE -->
 <div class="fab leave" onclick="leaveRoom()">
-  ➜
+  🚪
+</div>
+
+<!-- HOST TRANSFER MODAL -->
+<div id="hostModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:#0008;">
+  <div style="background:white; padding:20px; margin:100px auto; width:300px; border-radius:12px;">
+    <h3>Choisir nouvel hôte</h3>
+    <select id="hostSelect"></select><br><br>
+    <button onclick="confirmNewHost()">Valider</button>
+  </div>
 </div>
 
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
