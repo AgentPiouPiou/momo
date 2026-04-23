@@ -2,21 +2,30 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Momo - Acceuil</title>
+<title>Momo</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<h1>Momo Game</h1>
+<div class="container">
 
-<input id="pseudo" placeholder="Pseudo"><br>
+<h1>🎮 Momo Game</h1>
 
-<button onclick="createRoom()">Créer une room</button><br>
+<input id="pseudo" placeholder="Pseudo">
 
-<input id="code" placeholder="Code room"><br>
-<button onclick="joinRoom()">Rejoindre</button>
+<button onclick="createRoom()">
+  ➕ Créer une room
+</button>
+
+<input id="code" placeholder="Code room">
+
+<button onclick="joinRoom()">
+  🚪 Rejoindre
+</button>
 
 <div id="error" style="color:red;"></div>
+
+</div>
 
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
