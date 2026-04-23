@@ -1,22 +1,20 @@
-// 🔑 utils
 function generateCode(){
   return Math.random().toString(36).substring(2,10).toUpperCase();
 }
 
 function getCode(){
-  return window.location.pathname.split("/").pop();
+  return new URLSearchParams(window.location.search).get("code");
 }
 
-// ❌ erreur
 function error(msg){
   const el = document.getElementById("error");
   if(el) el.innerText = msg;
   console.log(msg);
 }
 
-// ======================
-// 🏠 CREATE ROOM
-// ======================
+/* =========================
+   🏠 CREATE ROOM
+========================= */
 window.createRoom = async () => {
   const pseudo = document.getElementById("pseudo").value;
 
@@ -31,12 +29,12 @@ window.createRoom = async () => {
     players: [pseudo]
   });
 
-  window.location.href = code;
+  window.location.href = `room.html?code=${code}`;
 };
 
-// ======================
-// 🚪 JOIN ROOM
-// ======================
+/* =========================
+   🚪 JOIN ROOM
+========================= */
 window.joinRoom = async () => {
   const pseudo = document.getElementById("pseudo").value;
   const code = document.getElementById("code").value;
@@ -59,13 +57,13 @@ window.joinRoom = async () => {
 
   await ref.update({ players });
 
-  window.location.href = code;
+  window.location.href = `room.html?code=${code}`;
 };
 
-// ======================
-// 🎮 ROOM PAGE
-// ======================
-if(window.location.pathname.length > 2 && !window.location.pathname.includes("login")){
+/* =========================
+   🎮 ROOM PAGE
+========================= */
+if(window.location.pathname.includes("room.html")){
 
   const code = getCode();
 
@@ -73,7 +71,6 @@ if(window.location.pathname.length > 2 && !window.location.pathname.includes("lo
 
   const ref = db.collection("rooms").doc(code);
 
-  // live players
   ref.onSnapshot(doc => {
     const data = doc.data();
     const players = data.players || [];
@@ -81,30 +78,29 @@ if(window.location.pathname.length > 2 && !window.location.pathname.includes("lo
     document.getElementById("players").innerHTML =
       players.map(p => `<div>${p}</div>`).join("");
 
-    // QR CODE
-    const loginURL = `https://agentpioupiou.github.io/momo/${code}/login`;
+    // QR CODE vers login
+    const loginURL = `https://agentpioupiou.github.io/momo/login.html?code=${code}`;
 
     const qrDiv = document.getElementById("qr");
     qrDiv.innerHTML = "";
 
-    QRCode.toCanvas(document.createElement("canvas"), loginURL, function (err, canvas) {
+    QRCode.toCanvas(document.createElement("canvas"), loginURL, (err, canvas) => {
       qrDiv.appendChild(canvas);
     });
   });
 }
 
-// ======================
-// 📱 LOGIN QR PAGE
-// ======================
+/* =========================
+   📱 LOGIN PAGE
+========================= */
 window.joinFromQR = async () => {
   const pseudo = document.getElementById("pseudo").value;
+  const code = getCode();
 
   if(!pseudo){
     error("Pseudo requis");
     return;
   }
-
-  const code = window.location.pathname.split("/")[2];
 
   const ref = db.collection("rooms").doc(code);
   const doc = await ref.get();
@@ -119,5 +115,5 @@ window.joinFromQR = async () => {
 
   await ref.update({ players });
 
-  window.location.href = `https://agentpioupiou.github.io/momo/${code}`;
+  window.location.href = `room.html?code=${code}`;
 };
