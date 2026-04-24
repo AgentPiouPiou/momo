@@ -1,7 +1,8 @@
 const BASE_URL = "https://agentpioupiou.github.io/momo";
 
+/* ========= UTILS ========= */
 function generateCode(){
-  return Math.random().toString(36).substring(2,10).toUpperCase();
+  return Math.floor(100000 + Math.random() * 900000).toString();
 }
 
 function getCode(){
@@ -16,7 +17,7 @@ function setPseudo(p){
   localStorage.setItem("pseudo", p);
 }
 
-/* ================= CREATE ================= */
+/* ========= CREATE ========= */
 window.createRoom = async () => {
   const pseudo = document.getElementById("pseudo").value;
   if(!pseudo) return;
@@ -27,14 +28,13 @@ window.createRoom = async () => {
 
   await db.collection("rooms").doc(code).set({
     host: pseudo,
-    players: [pseudo],
-    status: "active"
+    players: [pseudo]
   });
 
   window.location.href = `${BASE_URL}/room.html?code=${code}`;
 };
 
-/* ================= JOIN ================= */
+/* ========= JOIN ========= */
 window.joinRoom = async () => {
   const pseudo = document.getElementById("pseudo").value;
   const code = document.getElementById("code").value;
@@ -46,16 +46,12 @@ window.joinRoom = async () => {
   const ref = db.collection("rooms").doc(code);
   const doc = await ref.get();
 
-  if(!doc.exists) return;
-
-  const data = doc.data();
-
-  if(data.status === "deleted"){
-    alert("Room supprimée");
+  if(!doc.exists){
+    alert("Room introuvable");
     return;
   }
 
-  let players = data.players || [];
+  let players = doc.data().players || [];
 
   if(!players.includes(pseudo)){
     players.push(pseudo);
@@ -66,7 +62,7 @@ window.joinRoom = async () => {
   window.location.href = `${BASE_URL}/room.html?code=${code}`;
 };
 
-/* ================= ROOM ================= */
+/* ========= ROOM ========= */
 if(window.location.pathname.includes("room.html")){
 
   const code = getCode();
@@ -83,17 +79,7 @@ if(window.location.pathname.includes("room.html")){
 
     const data = doc.data();
 
-    if(data.status === "deleted"){
-      alert("L'hôte a supprimé la room");
-      window.location.href = BASE_URL;
-      return;
-    }
-
-    const isHost = data.host === pseudo;
-
-    document.getElementById("deleteBtn").style.display = isHost ? "flex" : "none";
-
-    document.getElementById("roomCode").innerText = "CODE : " + code;
+    document.getElementById("roomCode").innerText = code;
 
     const players = data.players || [];
 
@@ -114,24 +100,7 @@ if(window.location.pathname.includes("room.html")){
   });
 }
 
-/* ================= DELETE ROOM ================= */
-window.deleteRoom = async () => {
-  const code = getCode();
-
-  const ref = db.collection("rooms").doc(code);
-
-  await ref.update({
-    status: "deleted"
-  });
-
-  setTimeout(async () => {
-    await ref.delete();
-  }, 1000);
-
-  window.location.href = BASE_URL;
-};
-
-/* ================= LEAVE ROOM ================= */
+/* ========= LEAVE ========= */
 window.leaveRoom = async () => {
   const code = getCode();
   const pseudo = getPseudo();
@@ -147,11 +116,10 @@ window.leaveRoom = async () => {
   let data = doc.data();
   let players = (data.players || []).filter(p => p !== pseudo);
 
-  // HOST LEAVE
+  // host quitte
   if(data.host === pseudo){
 
     if(players.length === 0){
-      await ref.update({ status: "deleted" });
       await ref.delete();
       window.location.href = BASE_URL;
       return;
@@ -171,4 +139,28 @@ window.leaveRoom = async () => {
   await ref.update({ players });
 
   window.location.href = BASE_URL;
+};
+
+/* ========= JOIN QR ========= */
+window.joinFromQR = async () => {
+  const pseudo = document.getElementById("pseudo").value;
+  const code = getCode();
+
+  setPseudo(pseudo);
+
+  const ref = db.collection("rooms").doc(code);
+  const doc = await ref.get();
+
+  if(!doc.exists){
+    alert("Room supprimée");
+    window.location.href = BASE_URL;
+    return;
+  }
+
+  let players = doc.data().players || [];
+  players.push(pseudo);
+
+  await ref.update({ players });
+
+  window.location.href = `${BASE_URL}/room.html?code=${code}`;
 };

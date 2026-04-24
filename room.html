@@ -2,37 +2,29 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Room</title>
+<title>Momo</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
 <div class="container">
 
-<h1>Lobby</h1>
+<h1>🎮 Momo</h1>
 
-<h2 id="roomCode"></h2>
+<input id="pseudo" placeholder="Pseudo">
 
-<div id="qr"></div>
+<button onclick="createRoom()">Créer une room</button>
 
-<div id="players"></div>
+<input id="code" placeholder="Code room" inputmode="numeric" pattern="[0-9]*">
 
-</div>
+<button onclick="joinRoom()">Rejoindre</button>
 
-<!-- DELETE -->
-<div id="deleteBtn" class="fab delete" style="display:none;" onclick="deleteRoom()">
-  🗑
-</div>
+<div id="error"></div>
 
-<!-- LEAVE -->
-<div class="fab leave" onclick="leaveRoom()">
-  🚪
 </div>
 
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
-
-<script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
 
 <script src="firebase.js"></script>
 <script src="app.js"></script>
