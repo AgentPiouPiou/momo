@@ -1,6 +1,6 @@
 const BASE_URL = "https://agentpioupiou.github.io/momo";
 
-/* ========= UTILS ========= */
+/* ===== UTILS ===== */
 function generateCode(){
   return Math.floor(100000 + Math.random() * 900000).toString();
 }
@@ -17,7 +17,7 @@ function setPseudo(p){
   localStorage.setItem("pseudo", p);
 }
 
-/* ========= CREATE ========= */
+/* ===== CREATE ===== */
 window.createRoom = async () => {
   const pseudo = document.getElementById("pseudo").value;
   if(!pseudo) return;
@@ -34,7 +34,7 @@ window.createRoom = async () => {
   window.location.href = `${BASE_URL}/room.html?code=${code}`;
 };
 
-/* ========= JOIN ========= */
+/* ===== JOIN ===== */
 window.joinRoom = async () => {
   const pseudo = document.getElementById("pseudo").value;
   const code = document.getElementById("code").value;
@@ -62,7 +62,7 @@ window.joinRoom = async () => {
   window.location.href = `${BASE_URL}/room.html?code=${code}`;
 };
 
-/* ========= ROOM ========= */
+/* ===== ROOM ===== */
 if(window.location.pathname.includes("room.html")){
 
   const code = getCode();
@@ -72,16 +72,20 @@ if(window.location.pathname.includes("room.html")){
   ref.onSnapshot(doc => {
 
     if(!doc.exists){
-      alert("Room supprimée");
       window.location.href = BASE_URL;
       return;
     }
 
     const data = doc.data();
+    const players = data.players || [];
+
+    // si on n'est plus dans la room → sortie silencieuse
+    if(!players.includes(pseudo)){
+      window.location.href = BASE_URL;
+      return;
+    }
 
     document.getElementById("roomCode").innerText = code;
-
-    const players = data.players || [];
 
     document.getElementById("players").innerHTML =
       players.map(p => `
@@ -97,10 +101,11 @@ if(window.location.pathname.includes("room.html")){
     QRCode.toCanvas(document.createElement("canvas"), url, (e,c)=>{
       qrDiv.appendChild(c);
     });
+
   });
 }
 
-/* ========= LEAVE ========= */
+/* ===== LEAVE ===== */
 window.leaveRoom = async () => {
   const code = getCode();
   const pseudo = getPseudo();
@@ -116,19 +121,17 @@ window.leaveRoom = async () => {
   let data = doc.data();
   let players = (data.players || []).filter(p => p !== pseudo);
 
+  // dernier joueur → delete
+  if(players.length === 0){
+    await ref.delete();
+    window.location.href = BASE_URL;
+    return;
+  }
+
   // host quitte
   if(data.host === pseudo){
-
-    if(players.length === 0){
-      await ref.delete();
-      window.location.href = BASE_URL;
-      return;
-    }
-
-    const newHost = players[0];
-
     await ref.update({
-      host: newHost,
+      host: players[0],
       players
     });
 
@@ -141,7 +144,7 @@ window.leaveRoom = async () => {
   window.location.href = BASE_URL;
 };
 
-/* ========= JOIN QR ========= */
+/* ===== JOIN QR ===== */
 window.joinFromQR = async () => {
   const pseudo = document.getElementById("pseudo").value;
   const code = getCode();
@@ -152,7 +155,6 @@ window.joinFromQR = async () => {
   const doc = await ref.get();
 
   if(!doc.exists){
-    alert("Room supprimée");
     window.location.href = BASE_URL;
     return;
   }
@@ -163,4 +165,45 @@ window.joinFromQR = async () => {
   await ref.update({ players });
 
   window.location.href = `${BASE_URL}/room.html?code=${code}`;
+};
+
+/* ===== QR SCAN ===== */
+window.startQRScan = async () => {
+
+  const video = document.getElementById("camera");
+  video.style.display = "block";
+
+  const stream = await navigator.mediaDevices.getUserMedia({
+    video: { facingMode: "environment" }
+  });
+
+  video.srcObject = stream;
+  video.play();
+
+  const canvas = document.createElement("canvas");
+  const ctx = canvas.getContext("2d");
+
+  const scan = () => {
+    if(video.readyState === video.HAVE_ENOUGH_DATA){
+
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+
+      ctx.drawImage(video, 0, 0);
+
+      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+
+      const code = jsQR(imageData.data, canvas.width, canvas.height);
+
+      if(code){
+        stream.getTracks().forEach(t => t.stop());
+        window.location.href = code.data;
+        return;
+      }
+    }
+
+    requestAnimationFrame(scan);
+  };
+
+  scan();
 };

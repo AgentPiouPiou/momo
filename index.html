@@ -19,9 +19,15 @@
 
 <button onclick="joinRoom()">Rejoindre</button>
 
+<button onclick="startQRScan()">Scanner QR Code</button>
+
+<video id="camera" style="display:none;"></video>
+
 <div id="error"></div>
 
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/jsqr/dist/jsQR.js"></script>
 
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
